@@ -21,8 +21,8 @@ module.exports = function(grunt) {
       'www/js',
       'www/styles',
       'www/templates',
-      'www/dependencies'
-    ]
+      'www/dependencies',
+    ],
   });
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -44,8 +44,8 @@ module.exports = function(grunt) {
   // 2. Then uncomment the following code:
   //
   // ```
-  // // Load Grunt plugin from the node_modules/ folder.
-  // grunt.loadNpmTasks('grunt-contrib-clean');
+  // Load Grunt plugin from the node_modules/ folder.
+  grunt.loadNpmTasks('grunt-contrib-clean');
   // ```
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
