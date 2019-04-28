@@ -9,8 +9,8 @@ angular.module('brushfire_videosPage', []).config([
   }]);
 
 angular.module('brushfire_videosPage').controller('PageCtrl', [
-  '$scope', '$timeout',
-  function($scope, $timeout) {
+  '$scope', '$http',
+  function($scope, $http) {
 
     /////////////////////////////////////////////////////////////////////////////
     // Immediately start fetching list of videos from the server.
@@ -19,28 +19,48 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
     // First, show a loading spinner
     $scope.videosLoading = true;
 
-    // Then simulate a delay
-    // (TODO: actually fetch videos from server instead of pretending)
-    $timeout(function afterRetrievingVideos() {
-      const _videos = [
-        {
-          title: 'FUNNY BABY VIDEOS',
-          src: 'https://www.youtube.com/embed/_FvTVWjLiHM',
-        }, {
-          title: 'Justin Bieber - Baby ft. Ludacris',
-          src: 'https://www.youtube.com/embed/kffacxfA7G4',
-        }, {
-          title: 'Charlie bit my finger - again !',
-          src: 'https://www.youtube.com/embed/_OBlgSz8sSM',
-        }];
+    $scope.submitVideosError = false;
 
-      // Hide the loading spinner:
+    // Get the existing videos.
+    io.socket.get('/video', function whenServerResponds(data, JWR) {
       $scope.videosLoading = false;
 
-      // Stick the videos into the DOM
-      $scope.videos = _videos;
+      if (JWR.statusCode >= 400) {
+        $scope.submitVideosError = true;
+        console.log('something bad happened');
+        return;
+      }
+      $scope.videos = _.reverse(data);
 
-    }, 750);
+      // Apply the changes to the DOM
+      // (we have to do this since `io.socket.get` is not a
+      // angular-specific magical promisy-thing)
+      $scope.$apply();
+
+      io.socket.on('video', function whenAVideoIsCreatedUpdatedOrDestroyed(event) {
+
+        // Add the new video to the DOM
+        $scope.videos.unshift({
+          title: event.data.title,
+          src: event.data.src,
+        });
+
+        // Apply the changes to the DOM
+        // (we have to do this since `io.socket.get` is not a
+        // angular-specific magical promisy-thing)
+        $scope.$apply();
+      });
+    });
+
+    ///////////////////////////////////////////////////////////////
+    // SET UP LISTENERS FOR DOM EVENTS
+    ///////////////////////////////////////////////////////////////
+
+    /**
+     * When new video is submitted...
+     * (the binding from our form's "submit" event to this function is
+     *  handled via `ng-submit="submitNewVideo($event)` in the HTML)
+     */
 
     $scope.submitNewVideo = function() {
 
@@ -52,7 +72,7 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
       }
 
       // Harvest the data out of the form
-      // (thanks to ng-model, it's already in the $scope dictionary)
+      // (thanks to ng-model, it's already in the $scope object)
       const _newVideo = {
         title: $scope.newVideoTitle,
         src: $scope.newVideoSrc,
@@ -89,27 +109,26 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
 
       // First, show a loading state
       // (also disables form submission)
-      $scope.busySubmittingVideo = true;
-
-      // Simulate a delay
-      $timeout(function() {
-
-        // TODO: handle error state from the server
-        // Success!
-        // Now we know it's the real deal and the server accepted our submission.
-
-        // Insert HTML for the newly added video into the DOM
-        $scope.videos.unshift(_newVideo);
+      io.socket.post('/video', { //#A
+        title: _newVideo.title,
+        src: _newVideo.src,
+      }, function whenServerResponds(data, JWR) {
+        $scope.videosLoading = false;
+        if (JWR.statusCode >= 400) { //#B
+          console.log('something bad happened');
+          return;
+        }
+        $scope.videos.unshift(_newVideo); //#C
 
         // Hide the loading state
         // (also re-enables form submission)
         $scope.busySubmittingVideo = false;
 
-        // Clear out form inputs
+        //Clear out form inputs
         $scope.newVideoTitle = '';
         $scope.newVideoSrc = '';
-
-      }, 750);
+        $scope.$apply(); //#D
+      });
     };
   },
 ]);
