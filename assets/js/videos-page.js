@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('brushfire_videosPage', []).config([
-  '$sceDelegateProvider', function($sceDelegateProvider) {
+  '$sceDelegateProvider', $sceDelegateProvider => {
     $sceDelegateProvider.resourceUrlWhitelist([
       'self',
       '*://www.youtube.com/**',
@@ -10,7 +10,7 @@ angular.module('brushfire_videosPage', []).config([
 
 angular.module('brushfire_videosPage').controller('PageCtrl', [
   '$scope', '$http',
-  function($scope, $http) {
+  ($scope, $http) => {
 
     /////////////////////////////////////////////////////////////////////////////
     // Immediately start fetching list of videos from the server.
@@ -22,7 +22,7 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
     $scope.submitVideosError = false;
 
     // Get the existing videos.
-    io.socket.get('/video', function whenServerResponds(data, JWR) {
+    io.socket.get('/video', (data, JWR) => {
       $scope.videosLoading = false;
 
       if (JWR.statusCode >= 400) {
@@ -37,7 +37,7 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
       // angular-specific magical promisy-thing)
       $scope.$apply();
 
-      io.socket.on('video', function whenAVideoIsCreatedUpdatedOrDestroyed(event) {
+      io.socket.on('video', event => {
 
         // Add the new video to the DOM
         $scope.videos.unshift({
@@ -62,7 +62,7 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
      *  handled via `ng-submit="submitNewVideo($event)` in the HTML)
      */
 
-    $scope.submitNewVideo = function() {
+    $scope.submitNewVideo = () => {
 
       // A little "spin-lock" to prevent double-submission
       // (because disabling the submit button still allows double-posts
@@ -112,7 +112,7 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
       io.socket.post('/video', { //#A
         title: _newVideo.title,
         src: _newVideo.src,
-      }, function whenServerResponds(data, JWR) {
+      }, (data, JWR) => {
         $scope.videosLoading = false;
         if (JWR.statusCode >= 400) { //#B
           console.log('something bad happened');

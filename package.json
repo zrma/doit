@@ -9,6 +9,7 @@
     "@sailshq/lodash": "^3.10.3",
     "@sailshq/socket.io-redis": "^5.2.0",
     "grunt": "1.0.1",
+    "machinepack-youtube": "^2.2.0",
     "sails": "^1.1.0",
     "sails-generate-static": "^0.11.3",
     "sails-hook-grunt": "^3.1.0",

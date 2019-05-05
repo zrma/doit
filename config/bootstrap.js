@@ -9,22 +9,53 @@
  * https://sailsjs.com/config/bootstrap
  */
 
-module.exports.bootstrap = async function() {
+module.exports.bootstrap = function(cb) {
 
-  // By convention, this is a good place to set up fake data during development.
-  //
-  // For example:
-  // ```
-  // // Set up fake development data (or if we already have some, avast)
-  // if (await User.count() > 0) {
-  //   return;
-  // }
-  //
-  // await User.createEach([
-  //   { emailAddress: 'ry@example.com', fullName: 'Ryan Dahl', },
-  //   { emailAddress: 'rachael@example.com', fullName: 'Rachael Shaw', },
-  //   // etc.
-  // ]);
-  // ```
+  Video.count().exec(function(err, numVideos) {
+    if (err) {
+      return cb(err);
+    }
 
+    if (numVideos > 0) {
+      console.log('Existing video records: ', numVideos)
+      return cb();
+    }
+    const Youtube = require('machinepack-youtube');
+
+    // List Youtube videos which match the specified search query.
+    Youtube.searchVideos({
+      query: 'grumpy cat',
+      apiKey: sails.config.google.apiKey,
+      limit: 15,
+    }).exec({
+      // An unexpected error occurred.
+      error: function(err) {
+        console.log('an error: ', err);
+        return cb(err);
+
+      },
+      // OK.
+      success: function(foundVideos) {
+
+        // Transform the incoming foundVideos to match the front end expected format
+        _.each(foundVideos, function(video) {
+          video.src = 'https://www.youtube.com/embed/' + video.id;
+          delete video.description;
+          delete video.publishedAt;
+          delete video.id;
+          delete video.url;
+        });
+
+        // Add the transformed video records to the video model
+        Video.createEach(foundVideos).exec(function(err, videoRecordsCreated) {
+          if (err) {
+            return cb(err);
+          }
+
+          console.log(videoRecordsCreated);
+          return cb();
+        });
+      },
+    });
+  });
 };
