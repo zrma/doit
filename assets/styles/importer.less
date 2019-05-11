@@ -5,8 +5,13 @@
  * from LESS to CSS.  Unlike CSS files, LESS files are not compiled and
  * included automatically unless they are imported below.
  *
- * For more information see:
- *   https://sailsjs.com/anatomy/assets/styles/importer-less
+ * The LESS files imported below are compiled and included in the order
+ * they are listed.  Mixins, variables, etc. should be imported first
+ * so that they can be accessed by subsequent LESS stylesheets.
+ *
+ * (Just like the rest of the asset pipeline bundled in Sails, you can
+ * always omit, customize, or replace this behavior with SASS, SCSS,
+ * or any other Grunt tasks you like.)
  */
 // For example:
 //
@@ -20,4 +25,10 @@
 // @import 'pages/signup.less';
 //
 // etc.
+// CSS/LESS dependencies
+@import 'fontawesome.less';
+// Helper mixins
+@import 'mixins/animations.less';
+// The rest of the styles
 @import 'custom.less';
+@import 'loading-spinner.less';

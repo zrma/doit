@@ -1,56 +1,42 @@
-'use strict';
-
-angular.module('brushfire_videosPage', []).config([
-  '$sceDelegateProvider', $sceDelegateProvider => {
-    $sceDelegateProvider.resourceUrlWhitelist([
-      'self',
-      '*://www.youtube.com/**',
-    ]);
-  }]);
-
-angular.module('brushfire_videosPage').controller('PageCtrl', [
+angular.module('brushfire').controller('videosPageController', [
   '$scope', '$http',
-  ($scope, $http) => {
+  function($scope, $http) {
 
     /////////////////////////////////////////////////////////////////////////////
     // Immediately start fetching list of videos from the server.
     /////////////////////////////////////////////////////////////////////////////
+
+    // Set up $scope.videos as an empty array to ensure it always exists.
+    $scope.videos = [];
 
     // First, show a loading spinner
     $scope.videosLoading = true;
 
     $scope.submitVideosError = false;
 
-    // Get the existing videos.
-    io.socket.get('/video', (data, JWR) => {
-      $scope.videosLoading = false;
+    
+      // Get the existing videos.
+      io.socket.get('/video', function whenServerResponds(data, JWR) {
+        $scope.videosLoading = false;
+        console.log('Fetched videos and subscribed... Response:', data);
 
-      if (JWR.statusCode >= 400) {
-        $scope.submitVideosError = true;
-        console.log('something bad happened');
-        return;
-      }
-      $scope.videos = _.reverse(data);
+        if (JWR.statusCode >= 400) {
+          $scope.submitVideosError = true;
+          $scope.videosLoading = false;
+          console.log('something bad happened',data);
+          $scope.$apply();
+          return;
+        }
 
-      // Apply the changes to the DOM
-      // (we have to do this since `io.socket.get` is not a
-      // angular-specific magical promisy-thing)
-      $scope.$apply();
-
-      io.socket.on('video', event => {
-
-        // Add the new video to the DOM
-        $scope.videos.unshift({
-          title: event.data.title,
-          src: event.data.src,
-        });
+        $scope.videos = data;
 
         // Apply the changes to the DOM
         // (we have to do this since `io.socket.get` is not a
         // angular-specific magical promisy-thing)
         $scope.$apply();
+
       });
-    });
+
 
     ///////////////////////////////////////////////////////////////
     // SET UP LISTENERS FOR DOM EVENTS
@@ -61,8 +47,7 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
      * (the binding from our form's "submit" event to this function is
      *  handled via `ng-submit="submitNewVideo($event)` in the HTML)
      */
-
-    $scope.submitNewVideo = () => {
+    $scope.submitNewVideo = function() {
 
       // A little "spin-lock" to prevent double-submission
       // (because disabling the submit button still allows double-posts
@@ -73,13 +58,13 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
 
       // Harvest the data out of the form
       // (thanks to ng-model, it's already in the $scope object)
-      const _newVideo = {
+      var _newVideo = {
         title: $scope.newVideoTitle,
         src: $scope.newVideoSrc,
       };
 
       // create placeholder anchor element
-      const parser = document.createElement('a');
+      var parser = document.createElement('a');
 
       // assign url to parser.href
       parser.href = _newVideo.src;
@@ -87,7 +72,7 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
       // Use the indexOf parser.search as the first argument and length of
       // parser.search as the second argument of parser.search.substring
       // The result is the YouTube ID --> LfOWehvvuo0
-      const youtubeID = parser.search.substring(parser.search.indexOf('=') + 1, parser.search.length);
+      var youtubeID = parser.search.substring(parser.search.indexOf('=') + 1, parser.search.length);
 
       _newVideo.src = 'https://www.youtube.com/embed/' + youtubeID;
 
@@ -109,16 +94,21 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
 
       // First, show a loading state
       // (also disables form submission)
-      io.socket.post('/video', { //#A
+      $scope.busySubmittingVideo = true;
+
+      io.socket.post('/video', {
         title: _newVideo.title,
-        src: _newVideo.src,
-      }, (data, JWR) => {
+        src: _newVideo.src
+      }, function whenServerResponds(data, JWR) {
+
         $scope.videosLoading = false;
-        if (JWR.statusCode >= 400) { //#B
+
+        if (JWR.statusCode>=400) {
           console.log('something bad happened');
           return;
         }
-        $scope.videos.unshift(_newVideo); //#C
+
+        $scope.videos.unshift(_newVideo);
 
         // Hide the loading state
         // (also re-enables form submission)
@@ -127,8 +117,25 @@ angular.module('brushfire_videosPage').controller('PageCtrl', [
         //Clear out form inputs
         $scope.newVideoTitle = '';
         $scope.newVideoSrc = '';
-        $scope.$apply(); //#D
+
+        $scope.$apply();
+
+      });
+
+      io.socket.on('video', function whenAVideoIsCreatedUpdatedOrDestroyed(event) {
+        // console.log('Is it firing',event);
+
+        // Add the new video to the DOM
+        $scope.videos.unshift({
+          title: event.data.title,
+          src: event.data.src
+        });
+
+        // Apply the changes to the DOM
+        // (we have to do this since `io.socket.get` is not a
+        // angular-specific magical promisy-thing)
+        $scope.$apply();
       });
     };
-  },
+  }
 ]);

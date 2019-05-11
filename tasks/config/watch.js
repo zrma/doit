@@ -48,8 +48,8 @@ module.exports = function(grunt) {
   // 2. Then uncomment the following code:
   //
   // ```
-  // // Load Grunt plugin from the node_modules/ folder.
-  // grunt.loadNpmTasks('grunt-contrib-watch');
+  // Load Grunt plugin from the node_modules/ folder.
+  grunt.loadNpmTasks('grunt-contrib-watch');
   // ```
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
