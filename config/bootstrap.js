@@ -11,15 +11,19 @@
 
 module.exports.bootstrap = function(cb) {
 
+  // Return the number of records in the video model
   Video.count().exec(function(err, numVideos) {
     if (err) {
       return cb(err);
     }
 
+    // If there's at least one log the number to the console.
     if (numVideos > 0) {
-      console.log('Existing video records: ', numVideos)
+      console.log('Existing video records: ', numVideos);
       return cb();
     }
+
+    // Add machinepack-youtube as a depedency
     const Youtube = require('machinepack-youtube');
 
     // List Youtube videos which match the specified search query.
@@ -30,8 +34,6 @@ module.exports.bootstrap = function(cb) {
     }).exec({
       // An unexpected error occurred.
       error: function(err) {
-        console.log('an error: ', err);
-        return cb(err);
 
       },
       // OK.
@@ -51,8 +53,7 @@ module.exports.bootstrap = function(cb) {
           if (err) {
             return cb(err);
           }
-
-          console.log(videoRecordsCreated);
+          console.log(foundVideos);
           return cb();
         });
       },
