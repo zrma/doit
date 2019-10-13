@@ -1,14 +1,17 @@
 ---
 development:
-  dialect: postgres
+  dialect: mysql
   database: didit_development
-  user: postgres
-  password: postgres
-  host: 127.0.0.1
+  user: didit
+  password: didit
+  host: localhost
+  port: 8306
   pool: 5
+  options:
+    encoding: "utf8_general_ci"
 
 test:
-  url: {{envOr "TEST_DATABASE_URL" "postgres://postgres:postgres@127.0.0.1:5432/didit_test?sslmode=disable"}}
+  url: {{envOr "TEST_DATABASE_URL" "mysql://didit:didit@localhost:8306/didit_test?sslmode=disable"}}
 
 production:
-  url: {{envOr "DATABASE_URL" "postgres://postgres:postgres@127.0.0.1:5432/didit_production?sslmode=disable"}}
+  url: {{envOr "DATABASE_URL" "mysql://didit:didit@localhost:8306/didit_production?sslmode=disable"}}
