@@ -29,7 +29,7 @@ angular.module('brushfire').controller('signupPageController', [
       }).catch(function onError(sailsResponse) {
 
         // Handle known error type(s).
-        if (sailsResponse.status == 409) {
+        if (sailsResponse.status === 409) {
           toastr.error(sailsResponse.data);
           $scope.signupForm.errorMsg = `An unexpected error occurred: ${JSON.stringify(
             sailsResponse.data || sailsResponse.status)}`;

@@ -50,7 +50,7 @@ module.exports.datastores = {
     adapter: 'sails-mysql',
     host: 'localhost',
     port: 8306,
-    url: 'mysql://root:didit@localhost:8306/didit',
+    url: 'mysql://didit:didit@localhost:8306/didit',
   },
 
 };
