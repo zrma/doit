@@ -21,5 +21,6 @@ require (
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/jackc/pgconn v1.0.1 // indirect
 	github.com/markbates/grift v1.1.0
+	github.com/stretchr/testify v1.4.0
 	github.com/unrolled/secure v0.0.0-20190103195806-76e6d4e9b90c
 )

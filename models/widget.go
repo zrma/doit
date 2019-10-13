@@ -5,17 +5,18 @@ import (
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop"
 	"github.com/gobuffalo/validate"
+	"github.com/gobuffalo/validate/validators"
 	"github.com/gofrs/uuid"
 	"time"
-	"github.com/gobuffalo/validate/validators"
 )
+
 type Widget struct {
-    ID uuid.UUID `json:"id" db:"id"`
-    Title string `json:"title" db:"title"`
-    SubTitle nulls.String `json:"sub_title" db:"sub_title"`
-    Description nulls.String `json:"description" db:"description"`
-    CreatedAt time.Time `json:"created_at" db:"created_at"`
-    UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	ID          uuid.UUID    `json:"id" db:"id"`
+	Title       string       `json:"title" db:"title"`
+	SubTitle    nulls.String `json:"sub_title" db:"sub_title"`
+	Description nulls.String `json:"description" db:"description"`
+	CreatedAt   time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at" db:"updated_at"`
 }
 
 // String is not required by pop and may be deleted
