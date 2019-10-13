@@ -7,11 +7,21 @@ development:
   host: localhost
   port: 8306
   pool: 5
-  options:
-    encoding: "utf8_general_ci"
 
 test:
-  url: {{envOr "TEST_DATABASE_URL" "mysql://didit:didit@localhost:8306/didit_test?sslmode=disable"}}
+  dialect: mysql
+  database: didit_test
+  user: didit
+  password: didit
+  host: localhost
+  port: 8306
+  pool: 5
 
 production:
-  url: {{envOr "DATABASE_URL" "mysql://didit:didit@localhost:8306/didit_production?sslmode=disable"}}
+  dialect: mysql
+  database: didit_production
+  user: didit
+  password: didit
+  host: localhost
+  port: 8306
+  pool: 5
